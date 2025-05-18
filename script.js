@@ -1,9 +1,9 @@
-const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbzvPlAUa9Q0qpftK5dEGoWwYC_wKCDh_HQjor2TzjZg_7uJunvYdcjxVxd8QBKcl1IT/exec';
+const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbzXkPeod3sbwyi6cN4uT7fXbq_BdzioziznxnzmhKQSVHElYWFWnUoYxSYURNESVg/exec'; // Ganti dengan URL milikmu
 
 let artikelMap = {};
 let scannedData = {};
 
-// Ambil artikel dari database di Google Sheet via GAS
+// Ambil artikel dari Google Sheet
 fetch(URL_WEB_APP)
   .then(res => res.json())
   .then(data => {
@@ -26,7 +26,7 @@ document.getElementById('submitBtn').addEventListener('click', submitToSheet);
 
 function addScan() {
   const spkNumber = document.getElementById('spkNumber').value.trim();
-  const barcode = document.getElementById('barcode').value.trim().toLowerCase(); // ✅ Convert ke huruf kecil
+  const barcode = document.getElementById('barcode').value.trim().toLowerCase(); // Normalisasi
   const qcResult = document.getElementById('qcResult').value;
 
   if (!spkNumber || !barcode) {
@@ -68,11 +68,10 @@ function updateTable() {
   Object.entries(scannedData).forEach(([key, { qty, timestamp, qc }]) => {
     const [spk, barcode] = key.split('|');
     const row = table.insertRow();
-
     row.insertCell().textContent = new Date(timestamp).toLocaleString('id-ID');
     row.insertCell().textContent = spk;
     row.insertCell().textContent = barcode;
-    row.insertCell().textContent = artikelMap[barcode] || 'Tidak Dikenal';
+    row.insertCell().textContent = artikelMap[barcode.toLowerCase()] || 'Tidak Dikenal';
     row.insertCell().textContent = qty;
     row.insertCell().textContent = qc;
 
@@ -89,7 +88,7 @@ function editEntry(key) {
   const entry = scannedData[key];
 
   const newSPK = prompt('Edit SPK Number:', spk);
-  const newBarcode = prompt('Edit Barcode:', barcode).toLowerCase(); // ✅ Convert ke huruf kecil
+  const newBarcode = prompt('Edit Barcode:', barcode).toLowerCase();
   const newQty = parseInt(prompt('Edit Qty:', entry.qty), 10);
   const newQC = prompt('Edit Hasil QC:', entry.qc);
 
@@ -115,10 +114,10 @@ function submitToSheet() {
   const payload = Object.entries(scannedData).map(([key, { qty, timestamp, qc }]) => {
     const [spk, code] = key.split('|');
     return {
-      tanggal: new Date(timestamp).toLocaleString('id-ID'),
-      lot: spk,
+      tanggal: new Date(timestamp).toISOString(),
+      spk,
       barcode: code,
-      nama: artikelMap[code] || 'Tidak Dikenal',
+      nama: artikelMap[code.toLowerCase()] || 'Tidak Dikenal',
       qty,
       qc
     };
@@ -136,12 +135,11 @@ function submitToSheet() {
       scannedData = {};
       updateTable();
     } else {
-      console.error('Server Error:', response);
-      alert('Gagal mengirim data ke Google Sheet: ' + response);
+      alert('Gagal kirim: ' + response);
     }
   })
   .catch(err => {
-    console.error('Fetch Error:', err);
+    console.error(err);
     alert('Gagal mengirim data ke Google Sheet.');
   });
 }
