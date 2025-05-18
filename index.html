@@ -1,34 +1,43 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Output Daily QC</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Output Daily QC</h1>
-  <input id="lotNumber" placeholder="Nomor Lot" />
+
+  <h2>Output Daily QC</h2>
+
+  <label for="lotNumber">Lot Number:</label><br />
+  <input type="text" id="lotNumber" placeholder="Masukkan Lot Number" /><br />
+
+  <label for="qcResult">Hasil QC:</label><br />
   <select id="qcResult">
     <option value="">Pilih Hasil QC</option>
     <option value="Lolos">Lolos</option>
     <option value="Reject">Reject</option>
-  </select>
-  <input id="barcode" placeholder="Scan Barcode" /><br><br>
+  </select><br />
 
-  <button onclick="submitToSheet()">Kirim</button>
+  <label for="barcode">Scan Barcode:</label><br />
+  <input type="text" id="barcode" placeholder="Scan atau ketik barcode di sini" autofocus /><br />
 
-  <table id="dataTable" border="1">
+  <button onclick="submitToSheet()">Kirim Data ke Google Sheets</button>
+
+  <table id="dataTable">
     <thead>
       <tr>
-        <th>Tanggal</th>
+        <th>Tanggal Scan</th>
         <th>Barcode</th>
         <th>Nama Artikel</th>
         <th>Qty</th>
-        <th>QC</th>
+        <th>Hasil QC</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <script src="index.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
