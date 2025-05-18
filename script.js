@@ -84,7 +84,7 @@ function submitToSheet() {
   })
     .then(res => res.text())
     .then(msg => {
-      if (msg.startsWith("OK")) {
+  if (msg.startsWith("OK")) {
         alert("✅ Data berhasil dikirim");
         scannedData = {};
         updateTable();
@@ -92,5 +92,5 @@ function submitToSheet() {
         alert("❌ Gagal kirim: " + msg);
       }
     })
-    .catch(err => alert("❌ Fetch error: " + err));
+    .catch(err => console.error("❌ Fetch error:", err));
 }
