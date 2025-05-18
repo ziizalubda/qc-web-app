@@ -1,32 +1,54 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Output Daily QC</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    input, select, button {
+      margin: 5px 0;
+      padding: 5px;
+      font-size: 14px;
+    }
+    table {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    button {
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-
   <h2>Output Daily QC</h2>
 
-  <label for="lotNumber">SPK NUMBER:</label><br />
-  <input type="text" id="lotNumber" placeholder="Masukkan SPK NUMBER" /><br />
+  <label>SPK NUMBER:</label><br>
+  <input type="text" id="spkNumber" placeholder="Masukkan nomor SPK"><br>
 
-  <label for="qcResult">Hasil QC:</label><br />
+  <label>Hasil QC:</label><br>
   <select id="qcResult">
-    <option value="">Pilih Hasil QC</option>
     <option value="Lolos">Lolos</option>
-    <option value="Reject">Reject</option>
-  </select><br />
+    <option value="Tidak Lolos">Tidak Lolos</option>
+  </select><br>
 
-  <label for="barcode">Scan Barcode:</label><br />
-  <input type="text" id="barcode" placeholder="Scan atau ketik barcode di sini" autofocus /><br />
+  <label>Scan Barcode:</label><br>
+  <input type="text" id="barcode" placeholder="Scan atau ketik barcode di sini"><br>
 
-  <button onclick="submitToSheet()">Kirim Data</button>
+  <button id="submitBtn">Kirim Data</button>
 
-  <table id="dataTable">
-  <thead>
+  <table id="scanTable">
     <tr>
       <th>Tanggal Scan</th>
       <th>Number SPK</th>
@@ -34,10 +56,9 @@
       <th>Nama Artikel</th>
       <th>Qty</th>
       <th>Hasil QC</th>
+      <th></th>
     </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+  </table>
 
   <script src="script.js"></script>
 </body>
