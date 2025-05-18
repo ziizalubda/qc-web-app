@@ -1,52 +1,23 @@
 const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbyvL2aoF_8CD8OjJDop6Kz1dYcUc1yqyQpasoqYf7S1o8tmDTO-lomcuGEAk_JQXAkE/exec';
 
-let artikelMap = {};
-let scannedData = {};
-
-async function loadArtikelMap() {
-  try {
-    const response = await fetch(URL_WEB_APP);
-    if (!response.ok) throw new Error('Gagal load data artikel');
-    artikelMap = await response.json();
-    console.log('Artikel Map:', artikelMap);
-  } catch (error) {
-    console.error('Gagal load artikel map:', error);
-    alert('Gagal load data artikel!');
-  }
-}
-
-document.getElementById('barcode').addEventListener('keydown', function (event) {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    saveEntry();
-  }
-});
-
-function saveEntry() {
-  const barcode = document.getElementById('barcode').value.trim();
-  if (!barcode) return;
-
-  const now = new Date().toISOString();
-
-  if (scannedData[barcode]) {
-    scannedData[barcode].qty += 1;
-  } else {
-    scannedData[barcode] = { qty: 1, timestamp: now };
-  }
-
-  document.getElementById('barcode').value = '';
-  document.getElementById('barcode').focus();
-  renderTable();
-}
-
 const artikelMap = {
   'HS-CMTH-38': 'Campbell Thyme 38',
   'HS-CMTH-39': 'Campbell Thyme 39',
-  // Tambahkan mapping barcode-artikel lainnya di sini
+  'HR-TCNR-39': 'Turner HR 39',
+  // Tambahkan barcode lain jika perlu
 };
 
 let scannedData = {};
 
+// Tangani Enter saat scan barcode
+document.getElementById('barcode').addEventListener('keydown', function (event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    addScan();
+  }
+});
+
+// Fungsi untuk menambah scan ke tabel
 function addScan() {
   const spkNumber = document.getElementById('spkNumber').value.trim();
   const barcode = document.getElementById('barcode').value.trim();
@@ -58,22 +29,27 @@ function addScan() {
   }
 
   const key = `${spkNumber}|${barcode}`;
+  const now = Date.now();
+
   if (!scannedData[key]) {
     scannedData[key] = {
       qty: 1,
-      timestamp: Date.now(),
+      timestamp: now,
       qc: qcResult
     };
   } else {
     scannedData[key].qty += 1;
-    scannedData[key].timestamp = Date.now();
+    scannedData[key].timestamp = now;
     scannedData[key].qc = qcResult;
   }
 
   document.getElementById('barcode').value = '';
+  document.getElementById('barcode').focus();
+
   updateTable();
 }
 
+// Update tabel tampilan
 function updateTable() {
   const table = document.getElementById('scanTable');
   table.innerHTML = `
@@ -107,6 +83,7 @@ function updateTable() {
   });
 }
 
+// Edit data
 function editEntry(key) {
   const [spk, barcode] = key.split('|');
   const entry = scannedData[key];
@@ -129,22 +106,17 @@ function editEntry(key) {
   updateTable();
 }
 
-document.getElementById('submitBtn').addEventListener('click', addScan);
-
-
+// Kirim ke Google Sheet
 function submitToSheet() {
-  const qc = document.getElementById('qcResult').value;
-
-  if (!qc) {
-    alert('Pilih hasil QC terlebih dahulu!');
+  if (Object.keys(scannedData).length === 0) {
+    alert('Belum ada data yang discan!');
     return;
   }
 
-  const payload = Object.entries(scannedData).map(([key, { qty, timestamp, lot }]) => {
+  const payload = Object.entries(scannedData).map(([key, { qty, timestamp, qc }]) => {
     const [spk, code] = key.split('|');
     return {
       timestamp: new Date(timestamp).toLocaleString('id-ID'),
-      lot,
       spk,
       barcode: code,
       artikel: artikelMap[code] || 'Tidak Dikenal',
@@ -153,7 +125,7 @@ function submitToSheet() {
     };
   });
 
-  fetch('https://script.google.com/macros/s/AKfycbyvL2aoF_8CD8OjJDop6Kz1dYcUc1yqyQpasoqYf7S1o8tmDTO-lomcuGEAk_JQXAkE/exec', {
+  fetch(URL_WEB_APP, {
     method: 'POST',
     body: JSON.stringify(payload),
     headers: { 'Content-Type': 'application/json' }
@@ -168,5 +140,3 @@ function submitToSheet() {
       alert('Gagal mengirim data!');
     });
 }
-
-init();
