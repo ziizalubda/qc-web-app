@@ -1,20 +1,21 @@
 const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbyvL2aoF_8CD8OjJDop6Kz1dYcUc1yqyQpasoqYf7S1o8tmDTO-lomcuGEAk_JQXAkE/exec';
-const URL_GET_ARTIKEL = 'https://script.google.com/macros/s/AKfycbyvL2aoF_8CD8OjJDop6Kz1dYcUc1yqyQpasoqYf7S1o8tmDTO-lomcuGEAk_JQXAkE/exec'; // Ganti dengan URL GET kamu
 
-let artikelList = [];
+let artikelMap = {}; // Akan diisi dari Google Sheets
 let scannedData = {};
 
-// Ambil data artikel dari Sheets
-fetch(URL_GET_ARTIKEL)
+// Ambil artikel dari database di Google Sheet via GAS
+fetch(URL_WEB_APP)
   .then(res => res.json())
-  .then(data => artikelList = data)
-  .catch(err => console.error('Gagal ambil artikel:', err));
+  .then(data => {
+    artikelMap = data;
+    console.log("Artikel berhasil dimuat:", artikelMap);
+  })
+  .catch(err => {
+    console.error("Gagal memuat data artikel:", err);
+    alert("Gagal memuat data artikel dari server");
+  });
 
-function getNamaArtikel(barcode) {
-  const found = artikelList.find(item => item.barcode === barcode);
-  return found ? found.nama : 'Tidak Dikenal';
-}
-
+// Event listener saat barcode di-enter
 document.getElementById('barcode').addEventListener('keydown', function (event) {
   if (event.key === 'Enter') {
     event.preventDefault();
@@ -22,8 +23,10 @@ document.getElementById('barcode').addEventListener('keydown', function (event) 
   }
 });
 
+// Tombol Kirim Data
 document.getElementById('submitBtn').addEventListener('click', submitToSheet);
 
+// Fungsi menambahkan scan ke daftar
 function addScan() {
   const spkNumber = document.getElementById('spkNumber').value.trim();
   const barcode = document.getElementById('barcode').value.trim();
@@ -51,6 +54,7 @@ function addScan() {
   updateTable();
 }
 
+// Update tabel HTML
 function updateTable() {
   const table = document.getElementById('scanTable');
   table.innerHTML = `
@@ -72,7 +76,7 @@ function updateTable() {
     row.insertCell().textContent = new Date(timestamp).toLocaleString('id-ID');
     row.insertCell().textContent = spk;
     row.insertCell().textContent = barcode;
-    row.insertCell().textContent = getNamaArtikel(barcode);
+    row.insertCell().textContent = artikelMap[barcode] || 'Tidak Dikenal';
     row.insertCell().textContent = qty;
     row.insertCell().textContent = qc;
 
@@ -84,6 +88,7 @@ function updateTable() {
   });
 }
 
+// Fungsi edit entry di tabel
 function editEntry(key) {
   const [spk, barcode] = key.split('|');
   const entry = scannedData[key];
@@ -106,6 +111,7 @@ function editEntry(key) {
   updateTable();
 }
 
+// Submit ke Google Sheets
 function submitToSheet() {
   if (Object.keys(scannedData).length === 0) {
     alert('Belum ada data yang discan!');
@@ -115,12 +121,12 @@ function submitToSheet() {
   const payload = Object.entries(scannedData).map(([key, { qty, timestamp, qc }]) => {
     const [spk, code] = key.split('|');
     return {
-      timestamp: new Date(timestamp).toLocaleString('id-ID'),
-      spk,
+      tanggal: new Date(timestamp).toLocaleString('id-ID'),
+      lot: spk,
       barcode: code,
-      artikel: getNamaArtikel(code),
+      nama: artikelMap[code] || 'Tidak Dikenal',
       qty,
-      hasilQC: qc
+      qc
     };
   });
 
