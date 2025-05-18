@@ -88,28 +88,22 @@ function submitToSheet() {
   }));
 
   fetch(URL_WEB_APP, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(response => response.text())
-  .then(result => {
-    alert('Data berhasil disimpan!');
-    scannedData = {};
-    renderTable();
-    document.getElementById('lotNumber').value = '';
-    document.getElementById('qcResult').value = '';
-    document.getElementById('barcode').value = '';
-    document.getElementById('barcode').focus();
-  })
-  .catch(error => {
-    alert('Gagal menyimpan data: ' + error);
-  });
-}
-
-async function init() {
-  await loadArtikelMap();
+  method: 'POST',
+  mode: 'no-cors', // ← ini WAJIB agar GitHub Pages bisa akses GAS Web App
+  body: JSON.stringify(payload),
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+.then(() => {
+  alert('Data berhasil disimpan!');
+  scannedData = {};
+  renderTable();
+  document.getElementById('lotNumber').value = '';
+  document.getElementById('qcResult').value = '';
+  document.getElementById('barcode').value = '';
   document.getElementById('barcode').focus();
-}
-
-init();
+})
+.catch(error => {
+  alert('Gagal menyimpan data: ' + error);
+});
