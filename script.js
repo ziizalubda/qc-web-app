@@ -131,18 +131,24 @@ function submitToSheet() {
   });
 
   fetch(URL_WEB_APP, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'application/json' }
-  })
-    .then(res => res.text())
-    .then(response => {
-      alert('Data berhasil dikirim ke Sheet!');
-      scannedData = {};
-      updateTable();
-    })
-    .catch(err => {
-      console.error('Gagal kirim data:', err);
-      alert('Gagal mengirim data ke Google Sheet.');
-    });
+  method: 'POST',
+  body: JSON.stringify(payload),
+  headers: { 'Content-Type': 'application/json' }
+})
+.then(res => res.text())
+.then(response => {
+  if (response.startsWith("OK")) {
+    alert('Data berhasil dikirim ke Sheet!');
+    scannedData = {};
+    updateTable();
+  } else {
+    console.error('Server Error:', response);
+    alert('Gagal mengirim data ke Google Sheet: ' + response);
+  }
+})
+.catch(err => {
+  console.error('Fetch Error:', err);
+  alert('Gagal mengirim data ke Google Sheet.');
+});
+
 }
