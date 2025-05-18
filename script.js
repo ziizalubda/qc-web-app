@@ -1,12 +1,19 @@
 const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbyvL2aoF_8CD8OjJDop6Kz1dYcUc1yqyQpasoqYf7S1o8tmDTO-lomcuGEAk_JQXAkE/exec';
+const URL_GET_ARTIKEL = 'https://script.google.com/macros/s/AKfycbyvL2aoF_8CD8OjJDop6Kz1dYcUc1yqyQpasoqYf7S1o8tmDTO-lomcuGEAk_JQXAkE/exec'; // Ganti dengan URL GET kamu
 
-const artikelMap = {
-  'HS-CMTH-38': 'Campbell Thyme 38',
-  'HS-CMTH-39': 'Campbell Thyme 39',
-  'HR-TCNR-39': 'Campbell Thyme 39', // Tambahkan sesuai kebutuhan
-};
-
+let artikelList = [];
 let scannedData = {};
+
+// Ambil data artikel dari Sheets
+fetch(URL_GET_ARTIKEL)
+  .then(res => res.json())
+  .then(data => artikelList = data)
+  .catch(err => console.error('Gagal ambil artikel:', err));
+
+function getNamaArtikel(barcode) {
+  const found = artikelList.find(item => item.barcode === barcode);
+  return found ? found.nama : 'Tidak Dikenal';
+}
 
 document.getElementById('barcode').addEventListener('keydown', function (event) {
   if (event.key === 'Enter') {
@@ -65,7 +72,7 @@ function updateTable() {
     row.insertCell().textContent = new Date(timestamp).toLocaleString('id-ID');
     row.insertCell().textContent = spk;
     row.insertCell().textContent = barcode;
-    row.insertCell().textContent = artikelMap[barcode] || 'Tidak Dikenal';
+    row.insertCell().textContent = getNamaArtikel(barcode);
     row.insertCell().textContent = qty;
     row.insertCell().textContent = qc;
 
@@ -111,7 +118,7 @@ function submitToSheet() {
       timestamp: new Date(timestamp).toLocaleString('id-ID'),
       spk,
       barcode: code,
-      artikel: artikelMap[code] || 'Tidak Dikenal',
+      artikel: getNamaArtikel(code),
       qty,
       hasilQC: qc
     };
@@ -133,4 +140,3 @@ function submitToSheet() {
       alert('Gagal mengirim data ke Google Sheet.');
     });
 }
-init();
