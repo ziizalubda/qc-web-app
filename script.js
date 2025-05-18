@@ -8,14 +8,14 @@ async function loadArtikelMap() {
     const response = await fetch(URL_WEB_APP);
     if (!response.ok) throw new Error('Gagal load data artikel');
     artikelMap = await response.json();
-    console.log('Data artikel berhasil dimuat:', artikelMap);
+    console.log('Artikel Map:', artikelMap);
   } catch (error) {
-    console.error('Error load artikel map:', error);
-    alert('Gagal memuat data artikel. Cek koneksi atau server.');
+    console.error('Gagal load artikel map:', error);
+    alert('Gagal load data artikel!');
   }
 }
 
-document.getElementById('barcode').addEventListener('keydown', function(event) {
+document.getElementById('barcode').addEventListener('keydown', function (event) {
   if (event.key === 'Enter') {
     event.preventDefault();
     saveEntry();
@@ -46,10 +46,7 @@ function renderTable() {
 
   for (const [code, { qty, timestamp }] of Object.entries(scannedData)) {
     const artikel = artikelMap[code] || 'Tidak Dikenal';
-    const tanggalFormatted = new Date(timestamp).toLocaleString('id-ID', {
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
+    const tanggalFormatted = new Date(timestamp).toLocaleString('id-ID');
 
     tbody.innerHTML += `<tr>
       <td>${tanggalFormatted}</td>
@@ -65,18 +62,9 @@ function submitToSheet() {
   const lot = document.getElementById('lotNumber').value.trim();
   const qc = document.getElementById('qcResult').value;
 
-  if (!lot) {
-    alert('Lot Number harus diisi!');
-    return;
-  }
-  if (!qc) {
-    alert('Hasil QC harus dipilih!');
-    return;
-  }
-  if (Object.keys(scannedData).length === 0) {
-    alert('Harap scan barcode terlebih dahulu!');
-    return;
-  }
+  if (!lot) return alert('Lot Number harus diisi!');
+  if (!qc) return alert('Hasil QC harus dipilih!');
+  if (Object.keys(scannedData).length === 0) return alert('Belum ada barcode yang discan!');
 
   const payload = Object.entries(scannedData).map(([barcode, data]) => ({
     lot,
@@ -87,20 +75,16 @@ function submitToSheet() {
     tanggal: data.timestamp
   }));
 
-  // Kirim data ke Google Apps Script
   fetch(URL_WEB_APP, {
     method: 'POST',
-    mode: 'no-cors', // penting agar bisa kirim ke GAS
+    mode: 'no-cors',
     body: JSON.stringify(payload),
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers: { 'Content-Type': 'application/json' }
   });
 
-  // Karena mode: 'no-cors', kita tidak bisa pakai then(). Jadi kita reset manual.
-  alert('Data sedang dikirim. Silakan cek Google Sheets setelah beberapa detik.');
+  alert('Data berhasil dikirim!');
 
-  // Reset tampilan
+  // Reset form
   scannedData = {};
   renderTable();
   document.getElementById('lotNumber').value = '';
@@ -108,3 +92,10 @@ function submitToSheet() {
   document.getElementById('barcode').value = '';
   document.getElementById('barcode').focus();
 }
+
+async function init() {
+  await loadArtikelMap();
+  document.getElementById('barcode').focus();
+}
+
+init();
