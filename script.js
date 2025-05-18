@@ -44,18 +44,42 @@ function renderTable() {
   const qc = document.getElementById('qcResult').value;
   tbody.innerHTML = '';
 
-  for (const [code, { qty, timestamp }] of Object.entries(scannedData)) {
+  Object.entries(scannedData).forEach(([code, { qty, timestamp }]) => {
     const artikel = artikelMap[code] || 'Tidak Dikenal';
-    const tanggalFormatted = new Date(timestamp).toLocaleString('id-ID');
+    const tanggalFormatted = new Date(timestamp).toLocaleString('id-ID', {
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
 
     tbody.innerHTML += `<tr>
       <td>${tanggalFormatted}</td>
-      <td>${code}</td>
+      <td>
+        ${code}
+        <button onclick="editBarcode('${code}')" style="margin-left:5px;">✏️</button>
+      </td>
       <td>${artikel}</td>
       <td>${qty}</td>
       <td>${qc || '-'}</td>
     </tr>`;
+  });
+}
+
+function editBarcode(oldCode) {
+  const newCode = prompt('Masukkan barcode baru:', oldCode);
+  if (!newCode || newCode === oldCode) return;
+
+  // Pindahkan data lama ke kode baru
+  if (scannedData[newCode]) {
+    scannedData[newCode].qty += scannedData[oldCode].qty;
+  } else {
+    scannedData[newCode] = {
+      qty: scannedData[oldCode].qty,
+      timestamp: scannedData[oldCode].timestamp
+    };
   }
+
+  delete scannedData[oldCode];
+  renderTable();
 }
 
 function submitToSheet() {
