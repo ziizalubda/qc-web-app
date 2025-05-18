@@ -87,22 +87,24 @@ function submitToSheet() {
     tanggal: data.timestamp
   }));
 
+  // Kirim data ke Google Apps Script
   fetch(URL_WEB_APP, {
-  method: 'POST',
-  mode: 'no-cors', // ← penting agar bisa kirim ke GAS
-  body: JSON.stringify(payload),
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
+    method: 'POST',
+    mode: 'no-cors', // penting agar bisa kirim ke GAS
+    body: JSON.stringify(payload),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
 
-// Tidak bisa pakai `.then(...)` karena mode: 'no-cors' tidak mendukung membaca response
+  // Karena mode: 'no-cors', kita tidak bisa pakai then(). Jadi kita reset manual.
+  alert('Data sedang dikirim. Silakan cek Google Sheets setelah beberapa detik.');
 
-// Lanjut langsung reset dan beri notifikasi
-alert('Data dikirim! (Cek Google Sheets untuk konfirmasi)');
-scannedData = {};
-renderTable();
-document.getElementById('lotNumber').value = '';
-document.getElementById('qcResult').value = '';
-document.getElementById('barcode').value = '';
-document.getElementById('barcode').focus();
+  // Reset tampilan
+  scannedData = {};
+  renderTable();
+  document.getElementById('lotNumber').value = '';
+  document.getElementById('qcResult').value = '';
+  document.getElementById('barcode').value = '';
+  document.getElementById('barcode').focus();
+}
