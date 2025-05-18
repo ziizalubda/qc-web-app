@@ -1,6 +1,6 @@
 const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbzvPlAUa9Q0qpftK5dEGoWwYC_wKCDh_HQjor2TzjZg_7uJunvYdcjxVxd8QBKcl1IT/exec';
 
-let artikelMap = {}; // Akan diisi dari Google Sheets
+let artikelMap = {};
 let scannedData = {};
 
 // Ambil artikel dari database di Google Sheet via GAS
@@ -15,7 +15,6 @@ fetch(URL_WEB_APP)
     alert("Gagal memuat data artikel dari server");
   });
 
-// Event listener saat barcode di-enter
 document.getElementById('barcode').addEventListener('keydown', function (event) {
   if (event.key === 'Enter') {
     event.preventDefault();
@@ -23,13 +22,11 @@ document.getElementById('barcode').addEventListener('keydown', function (event) 
   }
 });
 
-// Tombol Kirim Data
 document.getElementById('submitBtn').addEventListener('click', submitToSheet);
 
-// Fungsi menambahkan scan ke daftar
 function addScan() {
   const spkNumber = document.getElementById('spkNumber').value.trim();
-  const barcode = document.getElementById('barcode').value.trim();
+  const barcode = document.getElementById('barcode').value.trim().toLowerCase(); // ✅ Convert ke huruf kecil
   const qcResult = document.getElementById('qcResult').value;
 
   if (!spkNumber || !barcode) {
@@ -54,7 +51,6 @@ function addScan() {
   updateTable();
 }
 
-// Update tabel HTML
 function updateTable() {
   const table = document.getElementById('scanTable');
   table.innerHTML = `
@@ -88,13 +84,12 @@ function updateTable() {
   });
 }
 
-// Fungsi edit entry di tabel
 function editEntry(key) {
   const [spk, barcode] = key.split('|');
   const entry = scannedData[key];
 
   const newSPK = prompt('Edit SPK Number:', spk);
-  const newBarcode = prompt('Edit Barcode:', barcode);
+  const newBarcode = prompt('Edit Barcode:', barcode).toLowerCase(); // ✅ Convert ke huruf kecil
   const newQty = parseInt(prompt('Edit Qty:', entry.qty), 10);
   const newQC = prompt('Edit Hasil QC:', entry.qc);
 
@@ -111,7 +106,6 @@ function editEntry(key) {
   updateTable();
 }
 
-// Submit ke Google Sheets
 function submitToSheet() {
   if (Object.keys(scannedData).length === 0) {
     alert('Belum ada data yang discan!');
@@ -131,24 +125,23 @@ function submitToSheet() {
   });
 
   fetch(URL_WEB_APP, {
-  method: 'POST',
-  body: JSON.stringify(payload),
-  headers: { 'Content-Type': 'application/json' }
-})
-.then(res => res.text())
-.then(response => {
-  if (response.startsWith("OK")) {
-    alert('Data berhasil dikirim ke Sheet!');
-    scannedData = {};
-    updateTable();
-  } else {
-    console.error('Server Error:', response);
-    alert('Gagal mengirim data ke Google Sheet: ' + response);
-  }
-})
-.catch(err => {
-  console.error('Fetch Error:', err);
-  alert('Gagal mengirim data ke Google Sheet.');
-});
-
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.text())
+  .then(response => {
+    if (response.startsWith("OK")) {
+      alert('Data berhasil dikirim ke Sheet!');
+      scannedData = {};
+      updateTable();
+    } else {
+      console.error('Server Error:', response);
+      alert('Gagal mengirim data ke Google Sheet: ' + response);
+    }
+  })
+  .catch(err => {
+    console.error('Fetch Error:', err);
+    alert('Gagal mengirim data ke Google Sheet.');
+  });
 }
