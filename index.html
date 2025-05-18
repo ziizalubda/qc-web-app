@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QC Scanner</title>
+  <meta charset="UTF-8">
+  <title>Daily Output QC</title>
 </head>
 <body>
-  <h1>Ouput Daily QC</h1>
-
-  <input type="text" id="lotNumber" placeholder="Nomor Lot" />
+  <h1>Daily Output QC </h1>
+  <input id="lotNumber" placeholder="Nomor Lot" /><br>
   <select id="qcResult">
-    <option value="">-- Pilih QC --</option>
+    <option value="">Pilih Hasil QC</option>
     <option value="Lolos">Lolos</option>
     <option value="Reject">Reject</option>
-  </select>
-  <input type="text" id="barcode" placeholder="Scan Barcode" />
+  </select><br>
+  <input id="barcode" placeholder="Scan Barcode" autofocus /><br><br>
+
+  <button onclick="submitToSheet()">Kirim</button>
 
   <table id="dataTable" border="1">
     <thead>
@@ -29,8 +29,6 @@
     <tbody></tbody>
   </table>
 
-  <button onclick="submitToSheet()">Kirim</button>
-
-  <script src="script.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
