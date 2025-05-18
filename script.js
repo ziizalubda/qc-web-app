@@ -39,96 +39,98 @@ function saveEntry() {
   renderTable();
 }
 
-const scannedData = {};
 const artikelMap = {
   'HS-CMTH-38': 'Campbell Thyme 38',
   'HS-CMTH-39': 'Campbell Thyme 39',
-  // Tambahkan sesuai kebutuhan
+  // Tambahkan mapping barcode-artikel lainnya di sini
 };
 
-function renderTable() {
-  const tbody = document.querySelector('#dataTable tbody');
-  const qc = document.getElementById('qcResult').value;
-  tbody.innerHTML = '';
+let scannedData = {};
 
-  Object.entries(scannedData).forEach(([key, { qty, timestamp, lot }]) => {
-    const [spk, code] = key.split('|');
-    const artikel = artikelMap[code] || 'Tidak Dikenal';
-    const tanggalFormatted = new Date(timestamp).toLocaleString('id-ID', {
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
+function addScan() {
+  const spkNumber = document.getElementById('spkNumber').value.trim();
+  const barcode = document.getElementById('barcode').value.trim();
+  const qcResult = document.getElementById('qcResult').value;
 
-    tbody.innerHTML += `<tr>
-      <td>${tanggalFormatted}</td>
-      <td>${spk}</td>
-      <td>
-        ${code}
-        <button onclick="editBarcode('${key}')" style="margin-left:5px;">✏️</button>
-        <button onclick="deleteBarcode('${key}')" style="margin-left:5px;color:red;">🗑️</button>
-      </td>
-      <td>${artikel}</td>
-      <td>${qty}</td>
-      <td>${qc || '-'}</td>
-    </tr>`;
+  if (!spkNumber || !barcode) {
+    alert('SPK Number dan Barcode harus diisi.');
+    return;
+  }
+
+  const key = `${spkNumber}|${barcode}`;
+  if (!scannedData[key]) {
+    scannedData[key] = {
+      qty: 1,
+      timestamp: Date.now(),
+      qc: qcResult
+    };
+  } else {
+    scannedData[key].qty += 1;
+    scannedData[key].timestamp = Date.now();
+    scannedData[key].qc = qcResult;
+  }
+
+  document.getElementById('barcode').value = '';
+  updateTable();
+}
+
+function updateTable() {
+  const table = document.getElementById('scanTable');
+  table.innerHTML = `
+    <tr>
+      <th>Tanggal Scan</th>
+      <th>Number SPK</th>
+      <th>Barcode</th>
+      <th>Nama Artikel</th>
+      <th>Qty</th>
+      <th>Hasil QC</th>
+      <th></th>
+    </tr>
+  `;
+
+  Object.entries(scannedData).forEach(([key, { qty, timestamp, qc }]) => {
+    const [spk, barcode] = key.split('|');
+    const row = table.insertRow();
+
+    row.insertCell().textContent = new Date(timestamp).toLocaleString('id-ID');
+    row.insertCell().textContent = spk;
+    row.insertCell().textContent = barcode;
+    row.insertCell().textContent = artikelMap[barcode] || 'Tidak Dikenal';
+    row.insertCell().textContent = qty;
+    row.insertCell().textContent = qc;
+
+    const editCell = row.insertCell();
+    const editBtn = document.createElement('button');
+    editBtn.textContent = '✏️';
+    editBtn.onclick = () => editEntry(key);
+    editCell.appendChild(editBtn);
   });
 }
 
-function editBarcode(oldKey) {
-  const [spk, oldCode] = oldKey.split('|');
-  const newCode = prompt('Masukkan barcode baru:', oldCode);
-  if (!newCode || newCode === oldCode) return;
+function editEntry(key) {
+  const [spk, barcode] = key.split('|');
+  const entry = scannedData[key];
 
-  const newKey = `${spk}|${newCode}`;
+  const newBarcode = prompt('Edit Barcode:', barcode);
+  const newSPK = prompt('Edit SPK Number:', spk);
+  const newQty = parseInt(prompt('Edit Qty:', entry.qty), 10);
+  const newQC = prompt('Edit Hasil QC:', entry.qc);
 
-  // Pindahkan datanya
-  if (scannedData[newKey]) {
-    scannedData[newKey].qty += scannedData[oldKey].qty;
-  } else {
-    scannedData[newKey] = {
-      qty: scannedData[oldKey].qty,
-      timestamp: scannedData[oldKey].timestamp,
-      lot: scannedData[oldKey].lot
-    };
-  }
+  if (!newBarcode || !newSPK || isNaN(newQty)) return;
 
-  delete scannedData[oldKey];
-  renderTable();
+  delete scannedData[key];
+  const newKey = `${newSPK}|${newBarcode}`;
+  scannedData[newKey] = {
+    qty: newQty,
+    timestamp: Date.now(),
+    qc: newQC || entry.qc
+  };
+
+  updateTable();
 }
 
-function deleteBarcode(key) {
-  if (confirm('Hapus baris ini?')) {
-    delete scannedData[key];
-    renderTable();
-  }
-}
+document.getElementById('submitBtn').addEventListener('click', addScan);
 
-document.getElementById('barcode').addEventListener('keypress', function (e) {
-  if (e.key === 'Enter') {
-    const barcode = e.target.value.trim();
-    const spk = document.getElementById('lotNumber').value.trim();
-
-    if (!barcode || !spk) {
-      alert('Lot Number dan Barcode harus diisi');
-      return;
-    }
-
-    const key = `${spk}|${barcode}`;
-
-    if (scannedData[key]) {
-      scannedData[key].qty += 1;
-    } else {
-      scannedData[key] = {
-        qty: 1,
-        timestamp: new Date(),
-        lot: spk
-      };
-    }
-
-    e.target.value = '';
-    renderTable();
-  }
-});
 
 function submitToSheet() {
   const qc = document.getElementById('qcResult').value;
