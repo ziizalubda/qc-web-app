@@ -1,4 +1,4 @@
-const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbyvL2aoF_8CD8OjJDop6Kz1dYcUc1yqyQpasoqYf7S1o8tmDTO-lomcuGEAk_JQXAkE/exec';
+const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbxnZyLz1aMMjJznQT9TVWvM0s6LJpz6Iex7_0bpQJ9Z2_13_S6FmUe4_pvlYcAPBU69/exec';
 
 let artikelMap = {}; // Akan diisi dari Google Sheets
 let scannedData = {};
