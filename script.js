@@ -89,21 +89,20 @@ function submitToSheet() {
 
   fetch(URL_WEB_APP, {
   method: 'POST',
-  mode: 'no-cors', // ← ini WAJIB agar GitHub Pages bisa akses GAS Web App
+  mode: 'no-cors', // ← penting agar bisa kirim ke GAS
   body: JSON.stringify(payload),
   headers: {
     'Content-Type': 'application/json'
   }
-})
-.then(() => {
-  alert('Data berhasil disimpan!');
-  scannedData = {};
-  renderTable();
-  document.getElementById('lotNumber').value = '';
-  document.getElementById('qcResult').value = '';
-  document.getElementById('barcode').value = '';
-  document.getElementById('barcode').focus();
-})
-.catch(error => {
-  alert('Gagal menyimpan data: ' + error);
 });
+
+// Tidak bisa pakai `.then(...)` karena mode: 'no-cors' tidak mendukung membaca response
+
+// Lanjut langsung reset dan beri notifikasi
+alert('Data dikirim! (Cek Google Sheets untuk konfirmasi)');
+scannedData = {};
+renderTable();
+document.getElementById('lotNumber').value = '';
+document.getElementById('qcResult').value = '';
+document.getElementById('barcode').value = '';
+document.getElementById('barcode').focus();
