@@ -1,66 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
-  <title>Ouput Daily QC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Ouput QC</title>
   <style>
-    body { font-family: Arial; max-width: 600px; margin: auto; padding: 20px; }
-    input, select, button { width: 100%; margin-top: 10px; padding: 10px; }
-    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    button { background-color: #28a745; color: white; border: none; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 { color: #333; }
+    label, input, select, button {
+      display: block;
+      margin-top: 10px;
+      padding: 8px;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      background-color: #fff;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    th {
+      background-color: #eee;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
-  <h2>⛶ Ouput Daily QC<h2>
+  <div class="container">
+    <h2>⛶ Daily Ouput QC</h2>
 
-  <input type="text" id="spk" placeholder="Nomor SPK">
-  <input type="text" id="barcode" placeholder="Scan Barcode" autofocus>
-  <select id="qc">
-    <option value="Lolos">Lolos</option>
-    <option value="Reject">Reject</option>
-  </select>
-  <button onclick="submitData()">📤 Kirim ke Google Sheet</button>
+    <label for="spkNumber">Nomor SPK:</label>
+    <input type="text" id="spkNumber" placeholder="Masukkan Nomor SPK">
 
-  <table id="resultTable">
-    <thead>
-      <tr><th>Tanggal</th><th>SPK</th><th>Barcode</th><th>Nama Artikel</th><th>Qty</th><th>QC</th></tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+    <label for="barcode">Scan Barcode:</label>
+    <input type="text" id="barcode" placeholder="Scan disini..." autofocus>
 
-  <script>
-    function submitData() {
-      const spk = document.getElementById("spk").value;
-      const barcode = document.getElementById("barcode").value;
-      const qc = document.getElementById("qc").value;
+    <label for="qcResult">Hasil QC:</label>
+    <select id="qcResult">
+      <option value="OK">OK</option>
+      <option value="NG">NG</option>
+    </select>
 
-      if (!spk || !barcode) {
-        alert("SPK dan Barcode wajib diisi!");
-        return;
-      }
+    <button id="submitBtn">📤 Kirim Data</button>
 
-      google.script.run.withSuccessHandler(response => {
-        if (response.success) {
-          const tbody = document.getElementById("tableBody");
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${new Date().toLocaleString()}</td>
-            <td>${spk}</td>
-            <td>${barcode}</td>
-            <td>${response.articleName}</td>
-            <td>1</td>
-            <td>${qc}</td>
-          `;
-          tbody.prepend(row);
-          document.getElementById("barcode").value = '';
-          document.getElementById("barcode").focus();
-        } else {
-          alert("Gagal menyimpan data!");
-        }
-      }).submitScan(spk, barcode, qc);
-    }
-  </script>
+    <table id="scanTable">
+      <tr>
+        <th>Tanggal Scan</th>
+        <th>Number SPK</th>
+        <th>Barcode</th>
+        <th>Nama Artikel</th>
+        <th>Qty</th>
+        <th>Hasil QC</th>
+        <th></th>
+      </tr>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
