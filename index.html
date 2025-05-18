@@ -1,86 +1,44 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Daily Ouput QC</title>
+  <meta charset="UTF-8" />
+  <title>Scan Barcode</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f5f5f5;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h2 { color: #333; }
-    label, input, select, button {
-      display: block;
-      margin-top: 10px;
-      padding: 8px;
-      width: 100%;
-      max-width: 400px;
-      box-sizing: border-box;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 20px;
-      background-color: #fff;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-    }
-    th {
-      background-color: #eee;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
+    body { font-family: Arial; padding: 20px; background: #f2f2f2; }
+    input, select, button { padding: 10px; margin: 5px 0; width: 100%; max-width: 400px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+    th, td { padding: 10px; border: 1px solid #ccc; }
+    th { background: #eee; }
+    button { background: #007bff; color: white; border: none; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>⛶ Daily Ouput QC</h2>
+  <h2>⛶ Daily Ouput QC</h2>
 
-    <label for="spkNumber">Nomor SPK:</label>
-    <input type="text" id="spkNumber" placeholder="Masukkan Nomor SPK">
+  <label>No. SPK:</label>
+  <input type="text" id="spkNumber" />
 
-    <label for="barcode">Scan Barcode:</label>
-    <input type="text" id="barcode" placeholder="Scan disini..." autofocus>
+  <label>Scan Barcode:</label>
+  <input type="text" id="barcode" autofocus />
 
-    <label for="qcResult">Hasil QC:</label>
-    <select id="qcResult">
-      <option value="OK">OK</option>
-      <option value="NG">NG</option>
-    </select>
+  <label>QC:</label>
+  <select id="qcResult">
+    <option value="OK">OK</option>
+    <option value="REJECT">REJECT</option>
+  </select>
 
-    <button id="submitBtn">📤 Kirim Data</button>
+  <button id="submitBtn">📤 Kirim Data</button>
 
-    <table id="scanTable">
-      <tr>
-        <th>Tanggal Scan</th>
-        <th>Number SPK</th>
-        <th>Barcode</th>
-        <th>Nama Artikel</th>
-        <th>Qty</th>
-        <th>Hasil QC</th>
-        <th></th>
-      </tr>
-    </table>
-  </div>
+  <table id="scanTable">
+    <tr>
+      <th>Waktu</th>
+      <th>SPK</th>
+      <th>Barcode</th>
+      <th>Nama Artikel</th>
+      <th>Qty</th>
+      <th>QC</th>
+    </tr>
+  </table>
 
   <script src="script.js"></script>
 </body>
