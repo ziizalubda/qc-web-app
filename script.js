@@ -1,4 +1,4 @@
-const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycby379spuU7lIDJ7NCAnegH08-lyZazludiQVXO1bhCdR5QKUFhtmM7Hg-dZa-AXg8aU/exec';
+const URL_WEB_APP = 'https://script.google.com/home/projects/1Gs5VLXOn_jzixWwml5nw2jHVjcXVJht4qGROSnnu6tIbmbzWuCK-O1FN';
 
 let artikelMap = {};
 let scannedData = {};
