@@ -95,6 +95,26 @@ function updateTable() {
     row.insertCell().textContent = qc;
   });
 }
+fetch(URL_WEB_APP, {
+  method: 'POST',
+  body: JSON.stringify(data),
+  headers: {
+    'Content-Type': 'application/json',
+  }
+})
+.then(res => res.json())
+.then(result => {
+  if (result.status === 'success') {
+    alert("✅ Data berhasil dikirim!");
+  } else {
+    throw new Error(result.message || "Unknown error");
+  }
+})
+.catch(err => {
+  alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
+  console.error(err);
+});
+
 
 function submitToSheet() {
   if (!Object.keys(scannedData).length) {
