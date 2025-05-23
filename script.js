@@ -3,11 +3,22 @@ const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycby379spuU7lIDJ7NCAn
 let artikelMap = {};
 let scannedData = {};
 
+// Ambil data artikel dari Web App
 fetch(URL_WEB_APP)
   .then(res => res.json())
-  .then(data => artikelMap = data)
-  .catch(err => alert("Gagal ambil data artikel"));
+  .then(data => {
+    artikelMap = {};
+    for (const key in data) {
+      const barcode = key.toLowerCase().trim();
+      artikelMap[barcode] = data[key];
+    }
+  })
+  .catch(err => {
+    console.error("❌ Gagal ambil data artikel:", err);
+    alert("❌ Gagal ambil data artikel dari server. Pastikan koneksi dan izin akses Web App.");
+  });
 
+// Event listener input barcode
 document.getElementById('barcode').addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     e.preventDefault();
@@ -15,22 +26,30 @@ document.getElementById('barcode').addEventListener('keydown', e => {
   }
 });
 
+// Event listener tombol Submit
 document.getElementById('submitBtn').addEventListener('click', submitToSheet);
 
 function addScan() {
   const spk = document.getElementById('spkNumber').value.trim();
-  const rawBarcode = document.getElementById('barcode').value.trim();
-  const barcode = rawBarcode.toLowerCase();
+  const rawBarcode = document.getElementById('barcode').value.trim().toLowerCase();
   const qc = document.getElementById('qcResult').value;
 
-  if (!spk || !barcode) return alert("SPK dan Barcode wajib diisi");
+  if (!spk || !rawBarcode) {
+    alert("⚠️ SPK dan Barcode wajib diisi.");
+    return;
+  }
 
-  const key = `${spk}|${barcode}`;
+  const key = `${spk}|${rawBarcode}`;
+
   if (!scannedData[key]) {
-    scannedData[key] = { qty: 1, timestamp: Date.now(), qc };
+    scannedData[key] = {
+      qty: 1,
+      timestamp: Date.now(),
+      qc
+    };
   } else {
     scannedData[key].qty++;
-    scannedData[key].timestamp = Date.now();
+    scannedData[key].timestamp = Date.now(); // update waktu scan terakhir
   }
 
   document.getElementById('barcode').value = '';
@@ -63,7 +82,10 @@ function updateTable() {
 }
 
 function submitToSheet() {
-  if (!Object.keys(scannedData).length) return alert("Belum ada data!");
+  if (!Object.keys(scannedData).length) {
+    alert("⚠️ Belum ada data untuk dikirim.");
+    return;
+  }
 
   const payload = Object.entries(scannedData).map(([key, { qty, timestamp, qc }]) => {
     const [spk, barcode] = key.split('|');
@@ -84,13 +106,16 @@ function submitToSheet() {
   })
     .then(res => res.text())
     .then(msg => {
-  if (msg.startsWith("OK")) {
-        alert("✅ Data berhasil dikirim");
+      if (msg.startsWith("OK")) {
+        alert("✅ Data berhasil dikirim ke Google Sheet.");
         scannedData = {};
         updateTable();
       } else {
-        alert("❌ Gagal kirim: " + msg);
+        alert("❌ Gagal kirim data: " + msg);
       }
     })
-    .catch(err => console.error("❌ Fetch error:", err));
+    .catch(err => {
+      console.error("❌ Fetch error saat kirim data:", err);
+      alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
+    });
 }
