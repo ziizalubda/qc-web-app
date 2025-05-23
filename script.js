@@ -114,21 +114,26 @@ function submitToSheet() {
     };
   });
 
-  fetch(URL_WEB_APP, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'application/json' }
-  })
-    .then(res => res.text())
-    .then(msg => {
-      if (msg.startsWith("OK")) {
-        alert("✅ Data berhasil dikirim ke Google Sheet.");
-        scannedData = {};
-        updateTable();
-      } else {
-        alert("❌ Gagal kirim data: " + msg);
-      }
-    })
+ fetch(URL_WEB_APP, {
+  method: 'POST',
+  body: JSON.stringify(data),
+  headers: {
+    'Content-Type': 'application/json',
+  }
+})
+.then(res => res.json())
+.then(result => {
+  if (result.status === 'success') {
+    alert("✅ Data berhasil dikirim!");
+  } else {
+    throw new Error(result.message || "Unknown error");
+  }
+})
+.catch(err => {
+  alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
+  console.error(err);
+});
+
     .catch(err => {
       console.error("❌ Fetch error saat kirim data:", err);
       alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
