@@ -55,6 +55,21 @@ function addScan() {
   document.getElementById('barcode').value = '';
   updateTable();
 }
+function doGet() {
+  const sheet = SpreadsheetApp.getActive().getSheetByName("DB");
+  const data = sheet.getDataRange().getValues();
+
+  const result = {};
+  for (let i = 1; i < data.length; i++) {
+    const barcode = data[i][0]; // kolom A
+    const artikel = data[i][1]; // kolom B
+    result[barcode.toLowerCase().trim()] = artikel;
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
 function updateTable() {
   const table = document.getElementById('scanTable');
