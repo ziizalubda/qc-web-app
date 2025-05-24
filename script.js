@@ -1,12 +1,7 @@
-<script>
 const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbwqqSxQT3lXtDZV51wXm53Z40RouE8rYgcdJ6ke47IwGck4uvJJFo3L4F6FS0aZR5g/exec';
 
 let artikelMap = {};
 let scannedData = {};
-
-// Disable input sementara
-const barcodeInput = document.getElementById('barcode');
-barcodeInput.disabled = true;
 
 // Ambil data artikel dari Web App
 fetch(URL_WEB_APP)
@@ -18,27 +13,34 @@ fetch(URL_WEB_APP)
       artikelMap[barcode] = data[key];
     }
     console.log("✅ Data artikel berhasil dimuat:", artikelMap);
-    barcodeInput.disabled = false; // Aktifkan input setelah data siap
   })
   .catch(err => {
     console.error("❌ Gagal ambil data artikel:", err);
-    alert("❌ Gagal ambil data artikel dari server. Pastikan koneksi dan izin akses Web App.");
+    alert("❌ Gagal ambil data artikel dari server.");
   });
 
-// Event listener input barcode
-barcodeInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    addScan();
+// Event listener: ENTER di input barcode
+document.addEventListener("DOMContentLoaded", () => {
+  const barcodeInput = document.getElementById('barcode');
+  const submitBtn = document.getElementById('submitBtn');
+
+  if (barcodeInput) {
+    barcodeInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addScan();
+      }
+    });
+  }
+
+  if (submitBtn) {
+    submitBtn.addEventListener('click', submitToSheet);
   }
 });
 
-// Event listener tombol Submit
-document.getElementById('submitBtn').addEventListener('click', submitToSheet);
-
 function addScan() {
   const spk = document.getElementById('spkNumber').value.trim();
-  const rawBarcode = barcodeInput.value.trim().toLowerCase();
+  const rawBarcode = document.getElementById('barcode').value.trim().toLowerCase();
   const qc = document.getElementById('qcResult').value;
 
   if (!spk || !rawBarcode) {
@@ -56,15 +58,19 @@ function addScan() {
     };
   } else {
     scannedData[key].qty++;
-    scannedData[key].timestamp = Date.now(); // update waktu scan terakhir
+    scannedData[key].timestamp = Date.now(); // update waktu
   }
 
-  barcodeInput.value = '';
+  console.log("✅ Scan berhasil ditambahkan:", scannedData[key]);
+
+  document.getElementById('barcode').value = '';
   updateTable();
 }
 
 function updateTable() {
   const table = document.getElementById('scanTable');
+  if (!table) return;
+
   table.innerHTML = `
     <tr>
       <th>Waktu</th>
@@ -86,8 +92,6 @@ function updateTable() {
     row.insertCell().textContent = qty;
     row.insertCell().textContent = qc;
   });
-
-  console.log("📝 Tabel diperbarui:", scannedData);
 }
 
 function submitToSheet() {
@@ -96,7 +100,7 @@ function submitToSheet() {
     return;
   }
 
-  const payload = Object.entries(scannedData).map(([key, { qty, timestamp, qc }]) => {
+  const data = Object.entries(scannedData).map(([key, { qty, timestamp, qc }]) => {
     const [spk, barcode] = key.split('|');
     return {
       timestamp,
@@ -110,24 +114,23 @@ function submitToSheet() {
 
   fetch(URL_WEB_APP, {
     method: 'POST',
-    body: JSON.stringify(payload),
+    body: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
     }
   })
-  .then(res => res.json())
-  .then(result => {
-    if (result.status === 'success') {
-      alert("✅ Data berhasil dikirim!");
-      scannedData = {}; // kosongkan data
-      updateTable(); // perbarui tabel
-    } else {
-      throw new Error(result.message || "Unknown error");
-    }
-  })
-  .catch(err => {
-    alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
-    console.error("❌ Fetch error saat kirim data:", err);
-  });
+    .then(res => res.json())
+    .then(result => {
+      if (result.status === 'success') {
+        alert("✅ Data berhasil dikirim!");
+        scannedData = {};
+        updateTable();
+      } else {
+        throw new Error(result.message || "Unknown error");
+      }
+    })
+    .catch(err => {
+      alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
+      console.error(err);
+    });
 }
-</script>
