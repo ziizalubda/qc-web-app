@@ -1,4 +1,4 @@
-const URL_WEB_APP = 'https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec';
+const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbz_iSsVy6PicX7Xr4Zlp6tzvjcoF8qxWpeg29yTKPcQzij4OeX5LjIpDNeHO6JVqq0/exec';
 
 let artikelMap = {};
 let scannedData = {};
