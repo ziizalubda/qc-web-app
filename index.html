@@ -2,26 +2,57 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Scan Barcode</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #f2f2f2; }
-    input, select, button { padding: 10px; margin: 5px 0; width: 100%; max-width: 400px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
-    th, td { padding: 10px; border: 1px solid #ccc; }
-    th { background: #eee; }
-    button { background: #007bff; color: white; border: none; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+    input, select, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background: #eee;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
-  <h2>⛶ Daily Ouput QC</h2>
+  <h2>⛶ Daily Output QC</h2>
 
-  <label>No. SPK:</label>
-  <input type="text" id="spkNumber" />
+  <label for="spkNumber">No. SPK:</label>
+  <input type="text" id="spkNumber" placeholder="Masukkan nomor SPK" />
 
-  <label>Scan Barcode:</label>
-  <input type="text" id="barcode" autofocus />
+  <label for="barcode">Scan Barcode:</label>
+  <input type="text" id="barcode" placeholder="Scan barcode di sini" autofocus />
 
-  <label>QC:</label>
+  <label for="qcResult">QC:</label>
   <select id="qcResult">
     <option value="OK">OK</option>
     <option value="REJECT">REJECT</option>
@@ -40,6 +71,7 @@
     </tr>
   </table>
 
+  <!-- Script terpisah -->
   <script src="script.js"></script>
 </body>
 </html>
