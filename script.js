@@ -1,7 +1,12 @@
+<script>
 const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbwqqSxQT3lXtDZV51wXm53Z40RouE8rYgcdJ6ke47IwGck4uvJJFo3L4F6FS0aZR5g/exec';
 
 let artikelMap = {};
 let scannedData = {};
+
+// Disable input sementara
+const barcodeInput = document.getElementById('barcode');
+barcodeInput.disabled = true;
 
 // Ambil data artikel dari Web App
 fetch(URL_WEB_APP)
@@ -12,6 +17,8 @@ fetch(URL_WEB_APP)
       const barcode = key.toLowerCase().trim();
       artikelMap[barcode] = data[key];
     }
+    console.log("✅ Data artikel berhasil dimuat:", artikelMap);
+    barcodeInput.disabled = false; // Aktifkan input setelah data siap
   })
   .catch(err => {
     console.error("❌ Gagal ambil data artikel:", err);
@@ -19,7 +26,7 @@ fetch(URL_WEB_APP)
   });
 
 // Event listener input barcode
-document.getElementById('barcode').addEventListener('keydown', e => {
+barcodeInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     e.preventDefault();
     addScan();
@@ -31,7 +38,7 @@ document.getElementById('submitBtn').addEventListener('click', submitToSheet);
 
 function addScan() {
   const spk = document.getElementById('spkNumber').value.trim();
-  const rawBarcode = document.getElementById('barcode').value.trim().toLowerCase();
+  const rawBarcode = barcodeInput.value.trim().toLowerCase();
   const qc = document.getElementById('qcResult').value;
 
   if (!spk || !rawBarcode) {
@@ -52,23 +59,8 @@ function addScan() {
     scannedData[key].timestamp = Date.now(); // update waktu scan terakhir
   }
 
-  document.getElementById('barcode').value = '';
+  barcodeInput.value = '';
   updateTable();
-}
-function doGet() {
-  const sheet = SpreadsheetApp.getActive().getSheetByName("DB");
-  const data = sheet.getDataRange().getValues();
-
-  const result = {};
-  for (let i = 1; i < data.length; i++) {
-    const barcode = data[i][0]; // kolom A
-    const artikel = data[i][1]; // kolom B
-    result[barcode.toLowerCase().trim()] = artikel;
-  }
-
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function updateTable() {
@@ -94,6 +86,8 @@ function updateTable() {
     row.insertCell().textContent = qty;
     row.insertCell().textContent = qc;
   });
+
+  console.log("📝 Tabel diperbarui:", scannedData);
 }
 
 function submitToSheet() {
@@ -114,28 +108,26 @@ function submitToSheet() {
     };
   });
 
- fetch(URL_WEB_APP, {
-  method: 'POST',
-  body: JSON.stringify(data),
-  headers: {
-    'Content-Type': 'application/json',
-  }
-})
-.then(res => res.json())
-.then(result => {
-  if (result.status === 'success') {
-    alert("✅ Data berhasil dikirim!");
-  } else {
-    throw new Error(result.message || "Unknown error");
-  }
-})
-.catch(err => {
-  alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
-  console.error(err);
-});
-
-    .catch(err => {
-      console.error("❌ Fetch error saat kirim data:", err);
-      alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
-    });
+  fetch(URL_WEB_APP, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(res => res.json())
+  .then(result => {
+    if (result.status === 'success') {
+      alert("✅ Data berhasil dikirim!");
+      scannedData = {}; // kosongkan data
+      updateTable(); // perbarui tabel
+    } else {
+      throw new Error(result.message || "Unknown error");
+    }
+  })
+  .catch(err => {
+    alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
+    console.error("❌ Fetch error saat kirim data:", err);
+  });
 }
+</script>
