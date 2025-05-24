@@ -1,34 +1,35 @@
-const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbz_iSsVy6PicX7Xr4Zlp6tzvjcoF8qxWpeg29yTKPcQzij4OeX5LjIpDNeHO6JVqq0/exec';
+const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbyvQypzBsvbw2CU9UHYdMu7n3Nb4lpKQTtY8tAaAA/dev';
 
 let artikelMap = {};
 let scannedData = {};
 
-// Load data artikel via JSONP
-function loadArtikelData() {
-  const script = document.createElement('script');
-  script.src = URL_WEB_APP + '?callback=handleArtikelData';
-  document.body.appendChild(script);
-}
-
-function handleArtikelData(data) {
-  artikelMap = data;
-  console.log("✅ Data artikel berhasil dimuat:", artikelMap);
-}
-
-loadArtikelData();
+fetch(URL_WEB_APP)
+  .then(res => res.json())
+  .then(data => {
+    artikelMap = {};
+    for (const key in data) {
+      const barcode = key.toLowerCase().trim();
+      artikelMap[barcode] = data[key];
+    }
+    console.log("✅ Data artikel berhasil dimuat:", artikelMap);
+  })
+  .catch(err => {
+    console.error("❌ Gagal ambil data artikel:", err);
+    alert("❌ Gagal ambil data artikel dari server.");
+  });
 
 document.addEventListener("DOMContentLoaded", () => {
   const barcodeInput = document.getElementById('barcode');
   const submitBtn = document.getElementById('submitBtn');
 
-  barcodeInput.addEventListener('keydown', e => {
+  barcodeInput?.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
       addScan();
     }
   });
 
-  submitBtn.addEventListener('click', submitToSheet);
+  submitBtn?.addEventListener('click', submitToSheet);
 });
 
 function addScan() {
@@ -60,8 +61,6 @@ function addScan() {
 
 function updateTable() {
   const table = document.getElementById('scanTable');
-  if (!table) return;
-
   table.innerHTML = `
     <tr>
       <th>Waktu</th>
