@@ -1,59 +1,34 @@
-const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbzg6D6weOqbhgST9d9UIaOrNHZ_bvXj6uRzW7_1exSx2WZ6NPMxC_JLc0Ldpu2IYNk/exec';
+const URL_WEB_APP = 'https://script.google.com/macros/s/YOUR_DEPLOY_ID/exec';
 
 let artikelMap = {};
 let scannedData = {};
 
-// Ambil data artikel dengan JSONP
+// Load data artikel via JSONP
 function loadArtikelData() {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    const callbackName = 'handleArtikelData_' + Date.now();
-
-    window[callbackName] = function(data) {
-      resolve(data);
-      document.body.removeChild(script);
-      delete window[callbackName];
-    };
-
-    script.src = URL_WEB_APP + '?callback=' + callbackName;
-    script.onerror = () => {
-      reject(new Error("Gagal load JSONP"));
-      document.body.removeChild(script);
-      delete window[callbackName];
-    };
-
-    document.body.appendChild(script);
-  });
+  const script = document.createElement('script');
+  script.src = URL_WEB_APP + '?callback=handleArtikelData';
+  document.body.appendChild(script);
 }
 
-// Panggil saat halaman siap
-loadArtikelData()
-  .then(data => {
-    artikelMap = data;
-    console.log("✅ Data artikel berhasil dimuat:", artikelMap);
-  })
-  .catch(err => {
-    console.error("❌ Gagal ambil data artikel via JSONP:", err);
-    alert("❌ Gagal ambil data artikel dari server.");
-  });
+function handleArtikelData(data) {
+  artikelMap = data;
+  console.log("✅ Data artikel berhasil dimuat:", artikelMap);
+}
 
-// Event listener, tambah scan dan submit tetap sama seperti sebelumnya
+loadArtikelData();
+
 document.addEventListener("DOMContentLoaded", () => {
   const barcodeInput = document.getElementById('barcode');
   const submitBtn = document.getElementById('submitBtn');
 
-  if (barcodeInput) {
-    barcodeInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        addScan();
-      }
-    });
-  }
+  barcodeInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addScan();
+    }
+  });
 
-  if (submitBtn) {
-    submitBtn.addEventListener('click', submitToSheet);
-  }
+  submitBtn.addEventListener('click', submitToSheet);
 });
 
 function addScan() {
@@ -78,8 +53,6 @@ function addScan() {
     scannedData[key].qty++;
     scannedData[key].timestamp = Date.now();
   }
-
-  console.log("✅ Scan berhasil ditambahkan:", scannedData[key]);
 
   document.getElementById('barcode').value = '';
   updateTable();
@@ -137,18 +110,18 @@ function submitToSheet() {
       'Content-Type': 'application/json',
     }
   })
-  .then(res => res.json())
-  .then(result => {
-    if (result.status === 'success') {
-      alert("✅ Data berhasil dikirim!");
-      scannedData = {};
-      updateTable();
-    } else {
-      throw new Error(result.message || "Unknown error");
-    }
-  })
-  .catch(err => {
-    alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
-    console.error(err);
-  });
+    .then(res => res.json())
+    .then(result => {
+      if (result.status === 'success') {
+        alert("✅ Data berhasil dikirim!");
+        scannedData = {};
+        updateTable();
+      } else {
+        throw new Error(result.message || "Unknown error");
+      }
+    })
+    .catch(err => {
+      alert("❌ Gagal kirim data. Periksa koneksi dan status Web App.");
+      console.error(err);
+    });
 }
